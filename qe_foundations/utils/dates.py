@@ -17,3 +17,7 @@ def timestamp_for_filename(moment=None):
     """Return a timestamp suitable for file and folder names."""
     moment = moment or datetime.now()
     return moment.strftime("%Y%m%d_%H%M%S")
+
+def days_between(start, end):
+    """Return the number of days from start to end."""
+    return (end - start).days
