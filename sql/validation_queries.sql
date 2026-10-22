@@ -117,12 +117,14 @@ ORDER BY run_id;
 -- @rule E-01 | Expectation | run 5001 was saved as expected (test_login_valid_user, SMOKE, QA, PASSED, build B-1042)
 -- @expect 1
 -- TODO: expectation query: name EVERY value you expect; the rule passes when exactly 1 row comes back.
-SELECT run_id, build_id
+SELECT run_id, test_name, suite, environment, status, build_id
 FROM test_runs
-WHERE build_id IS NULL
-   OR build_id NOT GLOB 'B-????'
-ORDER BY run_id;
-
+WHERE run_id = 5001
+  AND test_name = 'test_login_valid_user'
+  AND suite = 'SMOKE'
+  AND environment = 'QA'
+  AND status = 'PASSED'
+  AND build_id = 'B-1042';
 -- @rule E-02 | Expectation | test-data discovery: the most recent FAILED run in QA exists (exactly one row returned)
 -- @expect 1
 -- TODO: test-data discovery: filter, ORDER BY ... DESC, then keep only the first row.
