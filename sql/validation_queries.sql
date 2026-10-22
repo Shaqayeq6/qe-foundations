@@ -24,27 +24,32 @@
 
 -- @rule R-01 | Completeness | executed_by must be present (not NULL, not blank)
 -- TODO: completeness: 'missing' can be NULL *or* an empty/space-only string.
-SELECT run_id
+SELECT run_id, executed_by
 FROM test_runs
-WHERE 1 = 0;
+WHERE executed_by IS NULL
+   OR TRIM(executed_by) = '';
 
 -- @rule R-02 | Validity | executed_by, when present, must look like an e-mail (contain '@' and a '.' after it)
 -- TODO: one defect = one rule: do not re-report the rows R-01 already catches.
-SELECT run_id
+SELECT run_id, executed_by
 FROM test_runs
-WHERE 1 = 0;
+WHERE executed_by IS NOT NULL
+  AND TRIM(executed_by) <> ''
+  AND executed_by NOT LIKE '%@%.%';
 
 -- @rule R-03 | Validity | status must be exactly PASSED, FAILED, SKIPPED or ERROR (upper case)
 -- TODO: exact match against a list; what does NOT IN do with NULL?
-SELECT run_id
+SELECT run_id, status
 FROM test_runs
-WHERE 1 = 0;
+WHERE status IS NULL
+   OR status NOT IN ('PASSED', 'FAILED', 'SKIPPED', 'ERROR');
 
 -- @rule R-04 | Validity | duration_ms must be present and not negative (0 is legal, e.g. SKIPPED)
 -- TODO: 0 is LEGAL (a SKIPPED run takes 0 ms) -- do not raise a false alarm. NULL needs its own test.
-SELECT run_id
+SELECT run_id, status, duration_ms
 FROM test_runs
-WHERE 1 = 0;
+WHERE duration_ms IS NULL
+   OR duration_ms < 0;
 
 -- @rule R-05 | Accuracy | duration_ms above 600000 (10 minutes) is an outlier needing review
 -- TODO: a plain threshold. Show the worst first (ORDER BY ... DESC).
