@@ -15,10 +15,10 @@ check_exercise.py compares this table with what your queries return.
 | R-02 | 5011, 5022 | 5011, 5022 | Results matched prediction: missing @ or missing a dot after @. |
 | R-03 | 5008, 5014, 5027, 5029 | 5008, 5014, 5027, 5029 | Extra whitespace was difficult to see; LENGTH revealed it. |
 | R-04 | 5009, 5016 | 5009, 5016 | Negative and NULL durations are invalid; zero is legal. |
-| R-05 | | | |
-| R-06 | | | |
-| R-07 | | | |
-| R-08 | | | |
+| R-05 | 5030, 5023 | 5023, 5030 | Prediction match even though the order is different. |
+| R-06 | 5013, 5020 | Check for values not in between 0 and 3 and NULL | Prediction matched. Check if NULL values are present alongside. |
+| R-07 | 5017, 5024, 5026 | 5017, 5024, 5026 | Prediction matched. Check for NULL, correct environment names, case-insensitive. |
+| R-08 | 5014, 5018, 5028 | 5014, 5018, 5028 | Prediction matched. Check whether whitespaces are visually difficult to identify. |
 | R-09 | | | |
 | R-10 | | | |
 | R-11 | | | |
