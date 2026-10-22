@@ -119,7 +119,31 @@ def print_table(columns, rows) -> None:
 
 # ---------------------------------------------------------------- TODO 1: logging (Wednesday)
 def setup_logging(log_file: Path = DEFAULT_LOG_FILE) -> logging.Logger:
-    """TODO (Block 4): build and return the logger named LOGGER_NAME.
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False
+
+    if logger.handlers:
+        return logger
+
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    return logger
+    
+    """ (Block 4): build and return the logger named LOGGER_NAME.
 
     Requirements:
       * console handler at INFO, file handler at DEBUG (so the file has more detail)
@@ -130,24 +154,78 @@ def setup_logging(log_file: Path = DEFAULT_LOG_FILE) -> logging.Logger:
         "duplicate log lines" pitfall)
     Hint: Wednesday demo file demos/3-wednesday/code/qa_logging.py.
     """
-    raise NotImplementedError("TODO: implement setup_logging")
+    # raise NotImplementedError("implement setup_logging")
 
 
 # ---------------------------------------------------------------- TODO 2: run one rule
 def run_rule(conn: sqlite3.Connection, rule: Rule) -> list:
-    """TODO (Block 4): run ONE rule and decide PASS or FAIL.
+    columns, rows = fetch_rows(conn, rule.sql)
+
+    if rule.expect is None:
+        return rows
+
+    if len(rows) == rule.expect:
+        return rows
+
+    raise ValidationFailedError(rule, rows)
+    """ (Block 4): run ONE rule and decide PASS or FAIL.
 
       * execute rule.sql (use fetch_rows)
       * if rule.expect is None  -> informational: just return the rows
       * if len(rows) == rule.expect -> the rule holds: return the rows
       * otherwise -> raise ValidationFailedError(rule, rows)   (see exceptions.py)
     """
-    raise NotImplementedError("TODO: implement run_rule")
+    #raise NotImplementedError(": implement run_rule")
 
 
 # ---------------------------------------------------------------- TODO 3: run the whole suite
 def run_all(conn: sqlite3.Connection, rules: List[Rule], logger: logging.Logger) -> List[RuleResult]:
-    """TODO (Block 4): run every rule, print one line each, log everything, return results.
+    results = []
+
+    for rule in rules:
+        try:
+            rows = run_rule(conn, rule)
+
+            if rule.expect is None:
+                status = "INFO"
+                logger.info("INFO %s", rule.rule_id)
+            else:
+                status = "PASS"
+                logger.info("PASS %s", rule.rule_id)
+
+            print(f"{status:<4}  {rule.rule_id}  "
+            f"{rule.dimension:<13} {rule.description}"
+            + (f"  ({len(rows)} row(s))" if status == "INFO" else "")
+        )
+
+        except ValidationFailedError as exc:
+            status = "FAIL"
+            rows = exc.rows
+
+            print(f"FAIL  {rule.rule_id}  "
+            f"{rule.dimension:<13} {rule.description}  "
+            f"({len(rows)} violating row(s))"
+        )
+
+            logger.warning("FAIL %s: %s", rule.rule_id, exc)
+
+            for row in rows:
+                print(f"      {tuple(row)}")
+
+        except Exception:
+            logger.exception("Broken query for %s", rule.rule_id)
+            raise
+
+        results.append(RuleResult(rule, status, rows))
+
+    passed = sum(result.status == "PASS" for result in results)
+    failed = sum(result.status == "FAIL" for result in results)
+    info = sum(result.status == "INFO" for result in results)
+
+    print(f"Summary: {passed} PASS, {failed} FAIL, {info} INFO")
+
+    return results
+    """ (Block 4): run every rule, print one line each, log everything, return results.
 
     For each rule, call run_rule inside try/except and print EXACTLY this shape
     (check_exercise.py parses it):
@@ -167,7 +245,7 @@ def run_all(conn: sqlite3.Connection, rules: List[Rule], logger: logging.Logger)
       * finish with a one-line summary: how many PASS / FAIL / INFO
     Return a list with one RuleResult per rule, in file order.
     """
-    raise NotImplementedError("TODO: implement run_all")
+    #raise NotImplementedError(": implement run_all")
 
 
 # ---------------------------------------------------------------- command line (PROVIDED + 1 TODO)
@@ -210,13 +288,24 @@ def main(argv=None) -> int:
             print(f"\n{rule.rule_id} | {rule.dimension} | {rule.description}")
             print_table(*fetch_rows(conn, rule.sql))
         return 0
+    
+    logger = setup_logging(Path(args.log_file))
 
-    # ---- TODO 4 (Block 4): the real suite run --------------------------------
+    results = run_all(conn, rules, logger)
+
+    if args.allow_failures:
+        return 0
+
+    if any(result.status == "FAIL" for result in results):
+        return 1
+
+    return 0
+    # ----  4 (Block 4): the real suite run --------------------------------
     #   1. logger = setup_logging(Path(args.log_file))
     #   2. results = run_all(conn, rules, logger)
     #   3. return 0 if no result has status "FAIL" or args.allow_failures is set,
     #      otherwise return 1   (a non-zero exit code is how CI notices a failure)
-    raise NotImplementedError("TODO: wire up setup_logging, run_all and the exit code")
+    #raise NotImplementedError(": wire up setup_logging, run_all and the exit code")
 
 
 if __name__ == "__main__":

@@ -15,8 +15,13 @@ Requirements (check_exercise.py tests them):
      expected vs. found -- your wording.)
 """
 
-
 class ValidationFailedError(Exception):
     """TODO: carry rule_id, description and rows; write a helpful message."""
     # TODO: def __init__(self, rule, rows): ...
-    pass
+    def __init__(self, rule, rows):
+        self.rule_id = rule.rule_id
+        self.description = rule.description
+        self.rows = rows
+        
+        message = f"{self.rule_id} failed: {len(rows)} row(s) returned"
+        super().__init__(message)
