@@ -19,10 +19,11 @@ check_exercise.py compares this table with what your queries return.
 | R-06 | 5013, 5020 | Check for values not in between 0 and 3 and NULL | Prediction matched. Check if NULL values are present alongside. |
 | R-07 | 5017, 5024, 5026 | 5017, 5024, 5026 | Prediction matched. Check for NULL, correct environment names, case-insensitive. |
 | R-08 | 5014, 5018, 5028 | 5014, 5018, 5028 | Prediction matched. Check whether whitespaces are visually difficult to identify. |
-| R-09 | | | |
-| R-10 | | | |
-| R-11 | | | |
-| R-12 | | | |
+| R-09 |  5005| 5005 |Finished 10 seconds before starting |
+| R-10 | 5005, 5032  |5005, 5032 |5005 finishes before starting; 5032 starts in the future |
+| R-11 | 5003, 5012, 5033 | 5003, 5012, 5033 | Failure message is missing for FAILED/ERROR, or present for PASSED. |
+| R-12 | 5031, 5034, 5036, 5037 | 5031, 5034, 5036, 5037 | Build ID is missing or does not match uppercase B, a dash, and exactly 4 characters. |
+
 
 ## Decoys: rows that look odd but are LEGAL (we must not flag them)
 
