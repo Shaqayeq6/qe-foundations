@@ -1,6 +1,7 @@
 """Load test sources, collect record errors, and summarize results."""
 
 import csv
+import logging
 from pathlib import Path
 
 from .contexts import LoadSession
@@ -13,7 +14,7 @@ from .exceptions import (
 )
 from .readers import read_csv_records, read_json_records, read_xml_records
 from .validation import validate_record
-
+logger = logging.getLogger(__name__)
 READERS = {
     ".csv": read_csv_records,
     ".json": read_json_records,
@@ -85,6 +86,7 @@ class BatchResult:
 
 def load_test_cases(path):
     """Load one source and collect its invalid records."""
+    logger.info("Loading source %s", path)
     with LoadSession(path):
         path = Path(path)
         suffix = path.suffix.lower()
@@ -108,11 +110,19 @@ def load_test_cases(path):
 
             except RecordValidationError as error:
                 report.rejected.append(error)
+                logger.warning(
+                    "Source %s row %d skipped: %s",
+                    path.name, row, error
+                )
             else:
                 seen_ids.add(record["id"])
                 report.valid.append(record)
 
         report.check_invariants()
+        logger.info(
+            "Loaded %s: %d good rows, %d bad rows",
+            path.name, len(report.valid), len(report.rejected)
+        )
         return report
 
 
