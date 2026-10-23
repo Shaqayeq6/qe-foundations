@@ -184,6 +184,7 @@ def run_all(conn: sqlite3.Connection, rules: List[Rule], logger: logging.Logger)
 
     for rule in rules:
         try:
+            logger.debug("Running %s SQL: %s", rule.rule_id, rule.sql)
             rows = run_rule(conn, rule)
 
             if rule.expect is None:
