@@ -79,8 +79,10 @@ WHERE test_name != TRIM(test_name) OR suite != TRIM(suite) OR status != TRIM(sta
 -- TODO: the LIKE pattern _ matches exactly one character; these timestamps are 19 characters long.
 SELECT run_id, started_at, finished_at
 FROM test_runs
-WHERE finished_at < started_at
-ORDER BY run_id;
+WHERE started_at IS NULL
+   OR finished_at IS NULL
+   OR started_at NOT LIKE '____-__-__ __:__:__'
+   OR finished_at NOT LIKE '____-__-__ __:__:__';
 
 -- @rule R-10 | Consistency | a run cannot finish before it starts, and cannot start in the future
 -- TODO: ISO-format text sorts in time order, so < works on it. date('now') is today.
@@ -125,6 +127,8 @@ WHERE run_id = 5001
   AND environment = 'QA'
   AND status = 'PASSED'
   AND build_id = 'B-1042';
+
+
 -- @rule E-02 | Expectation | test-data discovery: the most recent FAILED run in QA exists (exactly one row returned)
 -- @expect 1
 -- TODO: test-data discovery: filter, ORDER BY ... DESC, then keep only the first row.
@@ -150,3 +154,13 @@ LIMIT 1;
 -- -- @rule S-03 | Stretch | test-data discovery: the 3 slowest runs whose duration is plausible (0..600000 ms)
 -- -- @expect any
 -- SELECT run_id, test_name, duration_ms FROM test_runs WHERE ... ORDER BY ... LIMIT 3;
+
+
+
+
+
+
+
+
+
+
